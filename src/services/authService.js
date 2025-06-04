@@ -1,47 +1,39 @@
-// src/services/authService.js
-import axios from 'axios';
+import api from './api';
 
-// Backend API'mizin temel URL'si
-// Bu URL'yi bir environment variable'dan almak daha iyidir, şimdilik sabit bırakalım.
-const API_URL = 'http://localhost:8080/api/auth/'; // Backend'inizin çalıştığı adresi ve portu kontrol edin
+// API_URL'yi artık api instance'ı baseURL olarak bildiği için path'ler direkt yazılabilir.
 
-// Kullanıcı Kayıt Fonksiyonu
 const register = (username, email, password) => {
-  return axios.post(API_URL + 'register', {
+  return api.post('/api/auth/register', {
     username,
     email,
     password,
   });
 };
 
-// Kullanıcı Giriş Fonksiyonu
 const login = (username, password) => {
-  return axios
-    .post(API_URL + 'login', {
+  return api
+    .post('/api/auth/login', { 
       username,
       password,
     })
     .then((response) => {
-      // Giriş başarılıysa ve backend bir accessToken döndürüyorsa
       if (response.data.accessToken) {
-        // JWT'yi localStorage'a kaydet(daha sonra AuthContext ile yönlendir)
-        localStorage.setItem('user', JSON.stringify(response.data));
+        // Kullanıcı adı bilgisini de response'dan veya parametreden alıp saklayalım
+        const userToStore = {
+          ...response.data, 
+          username: username // veya response.data.username (eğer backend dönüyorsa)
+        };
+        localStorage.setItem('user', JSON.stringify(userToStore));
       }
-      return response.data; // Dönen tüm veriyi (örn: { accessToken: "...", tokenType: "..." }) geri ver
+      return response.data;
     });
-}; 
-
-// Kullanıcı Çıkış Fonksiyonu
-const logout = () => {
-  // localStorage'dan kullanıcı bilgilerini (ve token'ı) sil
-  localStorage.removeItem('user');
-  // İsteğe bağlı: Backend'de bir logout endpoint'i varsa onu da çağırabilirsiniz
-  // return axios.post(API_URL + 'logout');
 };
 
-// Mevcut Kullanıcı Bilgilerini (ve Token'ı) Alma Fonksiyonu
+const logout = () => {
+  localStorage.removeItem('user');
+};
+
 const getCurrentUser = () => {
-  // localStorage'dan kullanıcı bilgilerini al ve parse et
   const userStr = localStorage.getItem('user');
   if (userStr) {
     return JSON.parse(userStr);
@@ -49,7 +41,6 @@ const getCurrentUser = () => {
   return null;
 };
 
-// Bu fonksiyonları dışa aktaralım ki başka dosyalarda kullanabilelim
 const AuthService = {
   register,
   login,
