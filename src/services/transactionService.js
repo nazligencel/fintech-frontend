@@ -24,6 +24,19 @@ const updateTransaction = (id, transactionData) => {
 const deleteTransaction = (id) => {
   return api.delete(`${API_TRANSACTIONS_URL}/${id}`); 
 };
+const getDashboardSummary = (year, month) => {
+  let params = {};
+  if (year) params.year = year;
+  if (month) params.month = month;
+  return api.get(`${API_TRANSACTIONS_URL}/summary`, { params });
+};
+
+const getCategoryExpenseSummary = (year, month) => {
+  let params = {};
+  if (year) params.year = year;
+  if (month) params.month = month;
+  return api.get(`${API_TRANSACTIONS_URL}/expenses/by-category`, { params });
+};
 
 const TransactionService = {
   getAllTransactions,
@@ -31,6 +44,8 @@ const TransactionService = {
   addTransaction,
   updateTransaction,
   deleteTransaction,
+   getDashboardSummary,
+  getCategoryExpenseSummary,
 };
 
 export default TransactionService;
